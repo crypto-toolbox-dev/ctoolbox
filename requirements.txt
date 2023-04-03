@@ -18,9 +18,9 @@ kiwisolver==1.4.4
 MarkupSafe==2.1.1
 matplotlib==3.5.2
 mplfinance==0.12.9b1
-numpy==1.21.6
+numpy
 packaging==21.3
-pandas==1.4.3
+pandas
 Pillow==9.2.0
 pycparser==2.21
 pyparsing==3.0.9
