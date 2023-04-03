@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Plots</title>
+    <style>
+        body {font-family: Helvetica; margin: 20px;}
+        form {padding: 10px}
+    </style>
+</head>
+<body>
+
+<form>
+
+<table>
+    <tr>
+         <th>
+            Time
+        </th>
+    </tr>
+    <tr>
+
+        <th>
+            <select name="timezone">
+        <option value="">-- Timezone --</option>
+        {% for tz in zones %}
+                <option value="{{ tz }}">{{ tz }}</option>
+        {% endfor %}
+
+    </select>
+
+    <select name="timeframe">
+        <option value="">-- Timeframe --</option>
+        {% for time in range %}
+                <option value="{{ time }}">{{ range[time] }}</option>
+        {% endfor %}
+
+    </select>
+
+    Start Date<input type="text" id="start" name="plot_start" placeholder="e.g. yyyy-mm-dd">
+        </th>
+
+    <tr>
+        <th>
+            Currencies
+        </th>
+
+    </tr>
+    <tr>
+        <th>
+            <select name="fiat">
+        <option value="">-- Select fiat --</option>
+        {% for exrate in fiatcurr %}
+                <option value="{{ exrate }}">{{ fiatcurr[exrate]['name'] + ' ' + '(' + exrate + ')' }}</option>
+        {% endfor %}
+
+    </select>
+
+   <select name="ccoin">
+        <option value="">-- Select a Coin --</option>
+        {% for ccoin in crycoin %}
+                <option value="{{ ccoin }}">{{ crycoin[ccoin]['Cryptocoin'] + '(' + ccoin + ')' }}</option>
+        {% endfor %}
+
+    </select>
+        </th>
+    </tr>
+
+    <tr>
+        <th>
+            Indicators
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+
+            <select name="top_plot">
+        <option value="">-- Indicator for Top Plot --</option>
+        {% for top_plot in top %}
+                <option value="{{ top_plot }}">{{ top[top_plot][0] }}</option>
+        {% endfor %}
+
+    </select>
+
+    <select name="main_plot">
+        <option value="">-- Indicator for Main Plot --</option>
+        {% for main_plot in main %}
+                <option value="{{ main_plot }}">{{ main[main_plot][0] }}</option>
+        {% endfor %}
+
+    </select>
+
+            <select name="bottom_plot">
+        <option value="">-- Indicator for Bottom Plot --</option>
+        {% for bottom_plot in bottom %}
+                <option value="{{ bottom_plot }}">{{ bottom[bottom_plot][0] }}</option>
+        {% endfor %}
+
+    </select>
+
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+            Moving Averages
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+             <select name="frstma">
+        <option value="">-- Moving Average One for Main Plot  --</option>
+        {% for ma in frstma %}
+            <option value="{{ ma }}"> {{ frstma[ma][0] }}</option>
+        {% endfor %}
+    </select>
+    <input type="text" id="firstmaperiods" name="fmap" placeholder="Days">
+
+    <select name="scndma">
+        <option value="">-- Moving Average Two for Main Plot  --</option>
+        {% for ma in scndma %}
+            <option value="{{ ma }}"> {{ scndma[ma][0] }}</option>
+        {% endfor %}
+    </select>
+    <input type="text" id="secondmaperiods" name="smap" placeholder="Days">
+
+
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+            Candlestick Patterns
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+
+          <select name="pattern">
+        <option value="">-- Pattern for Main Plot  --</option>
+        {% for pattern in patterns %}
+            <option value="{{ pattern }}"> {{ patterns[pattern][0] }}</option>
+        {% endfor %}
+        </select>
+
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+            Fibonacci Level Lines
+        </th>
+
+    </tr>
+
+    <tr>
+        <th>
+            <select name="fibonacci">
+        <option value="">-- Fibonacci Main Plot --</option>
+        {% for f in fibonaccis %}
+            <option value="{{ f }}"> {{ fibonaccis[f][0] }}</option>
+        {% endfor %}
+    </select>
+
+        Trend Start <input type="text" id="fibextstart" name="fexs" placeholder="e.g. yyyy-mm-dd">
+        Trend End <input type="text" id="fibextend" name="fexe" placeholder="e.g. yyyy-mm-dd">
+        Reversal End <input type="text" id="fibrevend" name="frev" placeholder="e.g. yyyy-mm-dd">
+        </th>
+
+    </tr>
+    <tr>
+        <th>
+                <input type="submit" value="scan"/>
+
+        </th>
+    </tr>
+
+
+
+</table>
+
+
+
+</form>
+    <br>
+    <br>
+
+<img src="data:image/png;base64, {{ plot }}" class='img-fluid' alt='Build a plot using the menus above' width=100% height=auto>
+
+
+<br>
+
+</body>
+</html>
+{% endblock %}

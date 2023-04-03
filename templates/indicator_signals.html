@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+     <h1>{% block title %} Indicator Scanner {% endblock %}</h1>
+     <h3>This page scans for various momentum indicators and some Cryptocoin specific indicators,
+        reporting a POTENTIAL signal if one is detected.
+     </h3>
+        <text>Choose a pattern from the menu and click "scan" to try it out!</text>
+
+    <style>
+        body {font-family: Helvetica; margin: 20px;}
+        td {padding: 10px}
+        .Bullish {background:green; color: white; }
+        .Bearish {background:red; color: white; }
+        .Very Bullish {background:green; color: white; }
+        .Very Bearish {background:red; color: white; }
+        .Buy {background:green; color: white; }
+        .Sell {background:red; color: white; }
+        .Oversold {background:green; color: white; }
+        .Overbought {background:red; color: white; }
+        .Very Oversold {background:green; color: white; }
+        .Very Overbought {background:red; color: white; }
+        .HODL {background:yellow; color: black; }
+        .Bubble {background:red; color: white; }
+
+
+
+
+
+    </style>
+</head>
+<body>
+
+<form>
+    <select name="indicator">
+        <option value="">-- Select an Indicator --</option>
+        {% for indicator in indicators %}
+                <option value="{{ indicator }}">{{ indicators[indicator] }}</option>
+        {% endfor %}
+
+    </select>
+    <input type="submit" value="scan"/>
+</form>
+
+<details>
+  <summary>
+      What is the {{ icode }} ?
+    <span class="icon">👇</span>
+  </summary>
+  <p>
+        {% autoescape false %}
+            {{ desc }}
+        {% endautoescape %}
+  </p>
+</details>
+
+<table>
+
+    {% for coin in cryptocoins %}
+
+        {% if cryptocoins[coin][indicator] %}
+        <tr>
+        <th>
+            Symbol
+        </th>
+        <th>
+            Name
+        </th>
+        <th>
+            Ticker
+        </th>
+
+        <th>
+            Signal
+        </th>
+    </tr>
+
+
+
+        <tr>
+            <td><img src="{{ icons[coin]['Images'] }}" alt="{{ coin }}" width=8% height=8% /></td>
+            <td style="text-align:left">{{ cryptocoins[coin]['Cryptocoin'] }}</td>
+            <td style="text-align:left">({{ coin }})</td>
+            <td class="{{ cryptocoins[coin][indicator] }}">{{ cryptocoins[coin][indicator] }}</td>
+        </tr>
+            <td colspan="3">
+                <img src="data:image/png;base64, {{ plot[coin] }}" class='img-fluid' alt='Responsive Image' width=100% height=auto>
+            </td>
+
+        {% endif %}
+
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
+{% endblock %}
+
+

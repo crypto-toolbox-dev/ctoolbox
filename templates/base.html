@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <title>{% block title %} {% endblock %} Crypt-TA Sentinel</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('hello') }}">Home</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('show_indicators') }}">Indicator Signals</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('show_patterns') }}">Pattern Signals</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('custom') }}">Custom Plots</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('about') }}">About App</a>
+            </li>
+        </ul>
+        </div>
+    </div>
+    </nav>
+    <div class="container">
+        {% block content %} {% endblock %}
+    </div>
+    <br>
+    <!--Footer-->
+<footer style="height:auto; background-color:#F7C201;">
+  <h1> IMPORTANT DISCLAIMER:</h1>
+
+  All content provided herein on this website, hyperlinked sites, associated applications,
+forums, blogs, social media accounts and other platforms or websites is for general information purposes only, procured
+from third party sources.<br> I make no warranties of any kind in relation to this content, including but not limited
+to accuracy and up-to-date status. No part of the content provided on this website constitutes financial
+advice, legal advice or any other <br> form of advice meant for your specific reliance for any purpose whatsoever.
+Any use or reliance on the content of this website is solely at your own risk and discretion.
+You should conduct your own research, review, analyse<br> and verify any content before relying on it.
+Trading is a highly risky activity that can lead to major losses, please therefore consult your
+ financial advisor before making any decision. <br><br>No content on this site is meant to be a solicitation or offer.<br>
+    There is no partnership or affiliation of any kind between this site and any hyperlinked resources.<br>
+    There is no partnership or affiliation of any kind between this site and the data resources that power it.
+</footer>
+    <br>
+    <a href="https://www.python.org">
+    <img src="https://www.python.org/static/community_logos/python-powered-w-100x40.png" alt="Visit Python.org" width=8% height=8% />
+    </a>
+    &nbsp; &nbsp;
+    <a href="https://palletsprojects.com/p/flask/">
+    <img src="https://flask.palletsprojects.com/en/2.2.x/_images/flask-logo.png" alt="Visit Pallet Projects Flask page" width=8% height=8% />
+    </a>
+    <br>
+     <br>
+    Data provided by <a href="https://www.CoinGecko.com">CoinGecko.com</a>&nbsp; &nbsp;<a href="https://www.CoinGecko.com">
+        <img src="https://static.coingecko.com/s/coingecko-branding-guide-8447de673439420efa0ab1e0e03a1f8b0137270fbc9c0b7c086ee284bd417fa1.png" alt="Visit CoinGecko.com" width=8% height=8% />
+        </a>
+    &nbsp; &nbsp;
+    and by <a href="https://messari.io/">Messari.io</a>&nbsp; &nbsp; <a href="https://messari.io/">
+    <img src="https://messari.io/images/messari-logo-footer-light-mode.svg" alt="Visit Messari.io" width=8% height=8% />
+    </a>
+    &nbsp; &nbsp;
+    <br>
+    Special thanks to both of these resources
+
+
+
+
+    <!-- Optional JavaScript -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+  </body>
+</html>

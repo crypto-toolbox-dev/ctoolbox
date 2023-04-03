@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block content %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+    <h1>{% block title %} About {% endblock %}</h1>
+    <h3>Cryp-TA Sentinal is a web-app written in
+        <a href="https://www.python.org">
+        <img src="https://www.python.org/static/community_logos/python-logo.png" alt="Visit Python.org" width=12% height=12% />
+            </a>
+ and rendered with the <a style="text-decoration: none; color: black;" href="https://palletsprojects.com/p/flask/">Flask Framework</a>
+    </h3>
+</head>
+<body>
+<br>
+<br>
+Cryp-TA Sentinel is a capstone project meant to showcase most of what I have learned to do with Python so far.
+It is meant to demonstrate the application of newly acquired skills using the REST api, flask, numpy, pandas, matplotlib,
+and the core Python libraries, all in one project. It is also meant to prove that I am capable of developing a fullstack
+webapp and deploying it on the internet.
+<br>
+<br>
+Cryptocurrency was chosen as the topic of focus because it is one of interest in the technology sector and because Blockchain
+technology is very much a part of many technology circles today. Furthermore, Cryptocurrency financial data, is made publicly
+available and easily accessible, providing an opportunity to practice working with historical timeseries data
+(in this case mostly Open High Low Close Volume data or OHLCV) and to demonstrate basic data wrangling, cleaning, and
+transformation techniques (for example, almost all the indicators are derived from transformations of the base OHLCV data
+using either <a href="https://pypi.org/project/TA-Lib/"> TA-lib </a> or basic Python + numpy + pandas) picked up from
+taking online courses and over the course of "failing and then learning" how to code and work with datasets.
+<br>
+<br>
+As per the disclaimer that appears on every page of this site, this webapp is not meant to give financial advice or to be
+used to inform or encourage any type of financial trading activities whatsoever. It is only meant to showcase basic
+learned skills as a novice Python software developer thus far.
+<br>
+<br>
+<br>
+<h1 style="padding-bottom: 10px;"> Acknowledgements </h1>
+Below are some resources that made creation of this webapp possible by way of the educational and tutorial materials
+they make available. Without them It would have not been possible to figure out
+how to code or build a basic webapp such as this. It is hoped these resources will also help others who want to learn.
+<br>
+<br>
+<br>
+
+<table>
+    <tr>
+        <th>
+            <a style="text-decoration: none; color: black;" href="https://codingnomads.co/about/"> <h2>CodingNomads</h2>
+            </a>
+        </th>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 20px;">
+        <b>From the site:</b><br>
+            "CodingNomads is an international technical training program and professional network.
+            Our driving force is the common belief that learning technical skills has the ability to
+            radically improve quality of life. Our mission is to help people of all backgrounds gain access
+            to high-value technical skills and the thriving job market for software engineers."
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            <a style="text-decoration: none; color: black;" href="https://nostarch.com/about"> <h2>No Starch Press</h2>
+            </a>
+        </th>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 20px;">
+        <b>From the site:</b><br>
+            "No Starch Press publishes the finest in geek entertainment — bestsellers like Python Crash Course, Python
+            for Kids, How Linux Works, and Hacking: The Art of Exploitation. We focus on computer programming, security,
+            hacking, alternative operating systems, STEM, and LEGO. Our titles have personality, our authors are
+            passionate, and we read and edit everything we publish. "
+        </td>
+    </tr>
+
+
+    <tr>
+        <th>
+            <a style="text-decoration: none; color: black;" href="https://www.youtube.com/@parttimelarry/about"> <h2>Part Time Larry</h2><h5> (Youtube Channel)</h5>
+            </a>
+
+        </th>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 20px;">
+            <b>From the channel maintainer:</b><br>
+
+            "This channel is dedicated to the intersection of financial markets and software engineering.
+            Specifically, I will show you how to write programs to analyze, visualize, integrate, and utilize
+            market data, API's, and financial services. Code is primarily written in Python.
+            If you want to learn more, please subscribe to the channel."
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            <a style="text-decoration: none; color: black;" href="https://www.youtube.com/@sentdex/about"> <h2>Sentdex</h2> <h5> (Youtube Channel)</h5>
+            </a>
+
+        </th>
+    </tr>
+    <tr>
+        <td style="padding-bottom: 20px;">
+            <b>From the channel maintainer:</b><br>
+            "Python Programming tutorials, going further than just the basics. Learn about machine learning, finance,
+            data analysis, robotics, web development, game development and more.  I have ~1000 videos, all of which do
+            not fit on the front page. Try searching on the channel page, or via https://pythonprogramming.net. If
+            you cannot find something, just ask! "
+        </td>
+    </tr>
+
+    <tr>
+        <th>
+            <a style="text-decoration: none; color: black;" href="https://ml4trading.io/"> <h2>ml4trading.io</h2>
+            </a>
+
+        </th>
+    </tr>
+    <tr>
+        <td>
+            <b>From the site:</b><br>
+            "Predictive models to extract signals from market and alternative data for systematic trading strategies with Python.
+            Learn to extract signals from financial and alternative data to design and backtest systematic strategies "
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
+
+{% endblock %}
