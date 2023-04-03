@@ -705,4 +705,4 @@ if updates_active == True:
     coin_datasets = update_datasets
 
 # Run the application
-app.run(debug=True, use_reloader=False)
+app.run(debug=False, use_reloader=False)
