@@ -696,6 +696,26 @@ def show_indicators():
                                plot=indicator_plots, icons=coin_image)
 
 
+# Create necessary directories for the app
+if not os.path.isdir('datasets'):
+    os.mkdir("datasets")
+
+if not os.path.isdir('txn_vol'):
+    os.mkdir("txn_vol")
+
+if not os.path.isdir('descriptions'):
+    os.mkdir("descriptions")
+
+if not os.path.isdir('notcurrentlyupdated'):
+    os.mkdir("notcurrentlyupdated")
+
+if not os.path.isdir('coinnames'):
+    os.mkdir("coinnames")
+
+if not os.path.isdir('fiat_exch_rates'):
+    os.mkdir("fiat_exch_rates")
+
+
 # Update the datasets for the app
 updates_active = True  # Set to false during some debugging operations
 
