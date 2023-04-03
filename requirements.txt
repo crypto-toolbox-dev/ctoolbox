@@ -7,17 +7,17 @@ charset-normalizer
 click
 clr-loader
 cycler
-Flask==2.1.2
+Flask
 fonttools
-gunicorn==20.1.0
+gunicorn
 idna
 importlib-metadata
 itsdangerous
-Jinja2==3.1.2
+Jinja2
 kiwisolver
 MarkupSafe
-matplotlib==3.5.2
-mplfinance==0.12.9b1
+matplotlib
+mplfinance
 numpy
 packaging
 pandas
@@ -31,11 +31,11 @@ pytz
 pytz-deprecation-shim
 requests
 six
-soupsieve==2.3.2.post1
-TA-Lib==0.4.25 --no-binary :all:
+soupsieve
+TA-Lib --no-binary :all:
 typing_extensions
 tzdata
 tzlocal
 urllib3
-Werkzeug==2.1.2
+Werkzeug
 zipp
