@@ -104,7 +104,7 @@ def get_fiat_names():
         soup = BeautifulSoup(req.text, "html.parser")
 
         # Search tags
-        results = soup.findAll("table", {"class": "wikitable sortable collapsible"})
+        results = soup.findAll("table", {"class": "wikitable sortable mw-collapsible"})
         lines = results[0].findAll("td")
 
         # Collect names and tickers
