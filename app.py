@@ -726,4 +726,4 @@ if updates_active == True:
 
 # Run the application
 if __name__ == "__main__":
-	app.run()
+    app.run()
