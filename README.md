@@ -78,7 +78,12 @@ After the above, to setup the project simply do:
 
 `pip install -r requirements.txt`
 
-`flask run`
+`flask run` for the Flask debug server
+
+or
+
+`gunicorn app:app` to serve it with gunicorn
+
 
 Once this is done the webapp can be accessed through a browser at the url
 provided by the debug server.
