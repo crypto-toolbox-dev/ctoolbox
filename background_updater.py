@@ -79,7 +79,7 @@ def timed_job_two():
 
 
 # Schedule and run updates for OHLCV and TXN Volume data
-@sched.scheduled_job('interval', minutes=15, next_run_time=datetime.datetime.now())
+@sched.scheduled_job('interval', hours=1, next_run_time=datetime.datetime.now())
 def timed_job():
 
     # Read cryptocoins for which to get OHLCV and TXN VOL data
