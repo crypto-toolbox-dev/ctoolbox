@@ -23,8 +23,16 @@ from hompage_functions import top_ten, fearandgreed, returns, cumulative_returns
 
 from background_updater import timed_job as update_datasets, timed_job_two as update_coinlists_and_fiatdata
 
+import logging
 
 app = Flask(__name__)
+
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
+
 
 # Homepage
 @app.route('/', methods=["GET", "POST"])
