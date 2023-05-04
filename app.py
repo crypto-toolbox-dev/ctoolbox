@@ -21,18 +21,46 @@ from hompage_functions import top_ten, fearandgreed, returns, cumulative_returns
     hbars, multi_bars, fng_line, mcap_pie_data, pie_chart, pie_chart_broken, spread
 
 
-from background_updater import timed_job as update_datasets, timed_job_two as update_coinlists_and_fiatdata
+from pprint import pprint
 
-import logging
+# Check necessary directories for the app, usually only needs to be run once.
+check_dirs = False
+
+if check_dirs == True:
+    # Create necessary directories for the app
+    if not os.path.isdir('datasets'):
+        os.mkdir("datasets")
+
+    if not os.path.isdir('txn_vol'):
+        os.mkdir("txn_vol")
+
+    if not os.path.isdir('descriptions'):
+        os.mkdir("descriptions")
+
+    if not os.path.isdir('notcurrentlyupdated'):
+        os.mkdir("notcurrentlyupdated")
+
+    if not os.path.isdir('coinnames'):
+        os.mkdir("coinnames")
+
+    if not os.path.isdir('fiat_exch_rates'):
+        os.mkdir("fiat_exch_rates")
+
+
+# Update the datasets for the app
+updates_active = False  # Set to false during some debugging operations
+
+if updates_active == True:
+
+    from background_updater import timed_job as update_datasets
+    from background_updater import timed_job_two as update_coinlists_and_fiatdata
+
+    print("Background updates active")
+    what_to_update_for = update_coinlists_and_fiatdata
+    coin_datasets = update_datasets
+
 
 app = Flask(__name__)
-
-
-if __name__ != '__main__':
-    gunicorn_logger = logging.getLogger('gunicorn.error')
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
-
 
 # Homepage
 @app.route('/', methods=["GET", "POST"])
@@ -43,8 +71,8 @@ def hello():
 
     # Copy the data to cleanup for display purposes on the homepage, without breaking or distorting anything else
     home_data = homecoins
-    #pprint(home_data)
 
+    # MARQUEE
     # If the value is less than .1 to the 10 -3 power, suppress scientific notation on the template
     for data in home_data:
         if data['current_price'] < .1 * 10 ** -3:
@@ -52,26 +80,9 @@ def hello():
             data['low_24h'] = "{:f}".format(data['low_24h'])
             data['current_price'] = "{:f}".format(data['current_price'])
 
-    #pprint(home_data)
     spread_data = spread(homecoins)
-    #pprint(spread_data)
 
-    #for data in spread_data:
-    #    print(data['id'])
-
-    # Gather returns and cumulative returns
-    cumprod_daily_pct = cumulative_returns(homecoins)
-
-    # Plot Returns and cumulative returns
-    cumprod_plot = plot_multiline(cumprod_daily_pct,'Historic Cumulative Returns', (7.4, 5.8))
-    cumulative_bars = hbars(cumprod_daily_pct, 'Current Year Cumulative Returns')
-
-    # plot multibar plot of cumulative returns by year
-    # Divided into 2 plots because of the vast differences in the data
-    multiba = multi_bars(cumprod_daily_pct, 'Cumulative Returns by Year', 0, -3)
-    multibb = multi_bars(cumprod_daily_pct, 'Cumulative Returns by Year', -3, None)
-
-    # Pull the Crypto Fear and Greed Index
+    # FEAR AND GREED INDEX
     cryptofng = fearandgreed()
 
     # Prepare Fear and Greed
@@ -82,78 +93,211 @@ def hello():
     values = cryptofng.fng_v
 
     # Plot Fear and Greed Index
-    fng_plot = fng_line(labels, values, " ", (20,5))
+    fng_plot = fng_line(labels, values, " ", (20, 5))
 
+
+    # CUMULATIVE RETURNS
+
+    # cumulative returns for all coins
+    cumprod_daily_pct = cumulative_returns(homecoins)
+
+    # cumulative returns without shiba-inu
+    cumprod_daily_pct_no_shib = [c for c in cumprod_daily_pct if 'shib' not in c.columns]
+
+    # cumulative returns without dogecoin
+    cumprod_daily_pct_no_shib_no_doge = [c for c in cumprod_daily_pct_no_shib if 'doge' not in c.columns]
+
+
+    # Cumulative returns for dogecoin and shiba-inu
+    doge_cumprod_daily_pct = [c for c in cumprod_daily_pct if 'doge' in c.columns]
+    shiba_cumprod_daily_pct = [c for c in cumprod_daily_pct if 'shib' in c.columns]
+
+    # Plot cumulative returns
+
+    # All coins
+    cumprod_plot = plot_multiline(cumprod_daily_pct, 'Historic All coins', (7.4, 5.8))
+    cumulative_bars = hbars(cumprod_daily_pct, 'Current Year All Coins')
+
+    # Without doge and Shiba
+    cumprod_plot_no_shib_doge = plot_multiline(cumprod_daily_pct_no_shib_no_doge, 'Historic without Shiba-Inu or Dogecoin', (7.4, 5.8))
+    cumprod_plot_no_shib_line = plot_multiline(cumprod_daily_pct_no_shib, 'Historic without Shiba-Inu', (7.4, 5.8))
+    cumulative_bars_no_shib_doge = hbars(cumprod_daily_pct_no_shib_no_doge, 'Current Year without Shiba-Inu or Dogecoin')
+    cumulative_bars_no_shib = hbars(cumprod_daily_pct_no_shib, 'Current Year without Shiba_Inu)')
+
+    # plot multibar plot of cumulative returns by year
+    # Divided into 2 plots because of the vast differences in the data
+    multiba = multi_bars(cumprod_daily_pct_no_shib, 'By Year without Shiba-Inu', 0, -3)
+    multibb = multi_bars(cumprod_daily_pct_no_shib_no_doge, 'By Year without Shiba-Inu or Dogecoin', -3, None)
+
+    # Doge and Shiba-Inu saw explosive returns 2020-2023.
+    # Plotting them along the rest makes it impossible to effectively visualize the data for the others
+    multib_shiba = multi_bars(shiba_cumprod_daily_pct, 'Shiba-Inu Cumulative Returns', -3, None)
+    multib_doge = multi_bars(doge_cumprod_daily_pct, 'Dogecoin Cumulative Returns', -3, None)
+
+
+    # NORMAL RETURNS
     # Dynamically change the type of Returns plotted depending on if button on template is clicked
     if request.method == 'POST':
         if request.form['submit_button'] == 'Daily':
             print("Daily Pressed")
 
+            # Daily
             return_pct = returns(homecoins, 1)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
+
 
         elif request.form['submit_button'] == 'Weekly':
             print("Weekly Pressed")
 
+            # Weekly
             return_pct = returns(homecoins, 7)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'{request.form["submit_button"]} Current Year Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         elif request.form['submit_button'] == 'Bi-Weekly':
             print("Bi-Weekly Pressed")
 
+            # Bi-Weekly
             return_pct = returns(homecoins, 14)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'{request.form["submit_button"]} Current Year Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         elif request.form['submit_button'] == 'Monthly':
             print("Monthly Pressed")
 
+            # Monthly
             return_pct = returns(homecoins, 30)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'{request.form["submit_button"]} Current Year Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         elif request.form['submit_button'] == 'Quarterly':
             print("Quarterly Pressed")
 
+            # Quarterly
             return_pct = returns(homecoins, 90)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         elif request.form['submit_button'] == 'Bi-Annual':
             print("Bi-Annual Pressed")
 
+            # Bi-annually
             return_pct = returns(homecoins, 180)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         elif request.form['submit_button'] == 'Annual':
             print("Annual Pressed")
 
+            # Yearly
             return_pct = returns(homecoins, 360)
-            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns')
-            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns')
-            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', 0, -2)
-            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year', -2, None)
+            return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]  # All except Shiba-Inu
+
+            returns_plot = plot_multiline(return_pct, f'Historical {request.form["submit_button"]} Returns - All Coins')
+            daily_bars = hbars(return_pct, f'Current Year {request.form["submit_button"]} Returns - All Coins')
+            multibc = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', 0, -2)
+            multibd = multi_bars(return_pct, f'{request.form["submit_button"]} Returns by Year - All Coins', -2, None)
+
+            # Only Shiba-Inu
+            returns_plot_shib = plot_multiline(return_pct_shib,
+                                               f'Historical {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            daily_bars_shib = hbars(return_pct_shib,
+                                    f'Current Year {request.form["submit_button"]} Returns - Except Shiba-Inu')
+            multibc_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', 0, -2)
+            multibd_shib = multi_bars(return_pct_shib,
+                                      f'{request.form["submit_button"]} Returns by Year - Except Shiba-Inu', -2, None)
 
         else:
             print("Nothing Happens")
             pass  # unknown
 
-    # Else if its a get request just plot Daily Returns
+    # Else if its a GET request just plot Daily Returns
     else:
         print("Was a GET request plotting daily returns")
         # Plot Returns Line and bars
@@ -166,14 +310,29 @@ def hello():
         multibc = multi_bars(return_pct, 'Daily Returns by Year', 0, -2)
         multibd = multi_bars(return_pct, 'Daily Returns by Year', -2, None)
 
+        # All except Shiba-Inu
+        return_pct_shib = [c for c in return_pct if 'shib' not in c.columns]
 
+        # Only Shiba-Inu
+        returns_plot_shib = plot_multiline(return_pct_shib, 'Historical Daily Returns - Except Shiba-Inu')
+        daily_bars_shib = hbars(return_pct_shib, 'Current Year Daily Returns - Except Shiba-Inu')
+        multibc_shib = multi_bars(return_pct_shib, 'Daily Returns by Year - Except Shiba-Inu', 0, -2)
+        multibd_shib = multi_bars(return_pct_shib, 'Daily Returns by Year - Except Shiba-Inu', -2, None)
+
+    # Pie Charts for Market Cap
     market_capital = mcap_pie_data()
-    pie = pie_chart(market_capital, (12,9))
-    broken_pie = pie_chart_broken(market_capital, (12,9))
+    pie = pie_chart(market_capital, (12, 9))
+    broken_pie = pie_chart_broken(market_capital, (12, 9))
 
     return render_template('home.html', fng=fng_plot, cumprod=cumprod_plot, returns=returns_plot,
-                           cumprod_bar=cumulative_bars, daily_b=daily_bars, mb=multiba, mb2=multibb,
-                           mb3=multibc, mb4=multibd, p=pie, p2=broken_pie, marquee_data=home_data, spreads=spread_data)
+                           cumprod_bar=cumulative_bars, daily_b=daily_bars, cumprod_no=cumprod_plot_no_shib_doge,
+                           cumprod_no_sl=cumprod_plot_no_shib_line,
+                           cumprod_bar_no_shib=cumulative_bars_no_shib, mb=multiba, mb2=multibb,
+                           cumprod_bar_no_shib_doge=cumulative_bars_no_shib_doge,
+                           doge_cret=multib_doge, shiba_cret=multib_shiba,
+                           mb3=multibc, mb4=multibd, p=pie, p2=broken_pie, marquee_data=home_data, spreads=spread_data,
+                           returns_shib=returns_plot_shib, returns_bars_shib=daily_bars_shib,
+                           returns_multi_bars_shib=multibc_shib, returns_multi_bars_shib2=multibd_shib)
 
 
 # About the app page
@@ -704,34 +863,6 @@ def show_indicators():
                                plot=indicator_plots, icons=coin_image)
 
 
-# Create necessary directories for the app
-if not os.path.isdir('datasets'):
-    os.mkdir("datasets")
-
-if not os.path.isdir('txn_vol'):
-    os.mkdir("txn_vol")
-
-if not os.path.isdir('descriptions'):
-    os.mkdir("descriptions")
-
-if not os.path.isdir('notcurrentlyupdated'):
-    os.mkdir("notcurrentlyupdated")
-
-if not os.path.isdir('coinnames'):
-    os.mkdir("coinnames")
-
-if not os.path.isdir('fiat_exch_rates'):
-    os.mkdir("fiat_exch_rates")
-
-
-# Update the datasets for the app
-updates_active = True  # Set to false during some debugging operations
-
-if updates_active == True:
-    print("Background updates active")
-    what_to_update_for = update_coinlists_and_fiatdata
-    coin_datasets = update_datasets
-
 # Run the application
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=False, use_reloader=False)
