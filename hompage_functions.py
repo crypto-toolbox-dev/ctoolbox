@@ -9,7 +9,7 @@ import numpy as np
 import time
 import requests
 import random
-from pprint import pprint
+
 
 def top_ten(limit=15):
     try:
@@ -62,12 +62,12 @@ def mcap_pie_data():
 
         data = response.json()
 
-    # Wrangle MArket Cap data
+    # Wrangle Market Cap data
     tcap = data["data"]["total_market_cap"]["usd"]
     fifteen_cap = top_ten(limit=15)
     fifteen_cap_name = [cap['id'] for cap in fifteen_cap]
 
-    fifteen_cap = [cap['market_cap'] for cap in fifteen_cap] # Market cap per coin in the top 15
+    fifteen_cap = [cap['market_cap'] for cap in fifteen_cap]  # Market cap per coin in the top 15
     fifteen_sum = sum(fifteen_cap)  # Total Mcap of top 15
     other_cap = tcap - fifteen_sum  # Total Mcap of all other coins listed
     fifteen_cap_name.append("All others")

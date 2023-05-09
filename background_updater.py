@@ -10,9 +10,6 @@ from dataset_maker import revise_datasets, fiat_exchange_rates, get_fiat_names, 
     messari_historic, coingecko_historic, on_chain_txnvol
 
 
-
-
-
 # Declare the scheduler
 sched = BackgroundScheduler()
 
@@ -48,34 +45,64 @@ txn_data_path = os.path.join(txn_data_dir)
 
 def timed_job_two():
 
-    # function calls
+    # Function calls
+    # Update the current list of the top coins and revise the existing one from coingecko
+    try:
+        # Get the filtered list of cryptocoins from coin gecko API, based on filters seen within the function above
+        cryptocoins = top_hundred_coins(cl)
 
-    # Get the filtered list of cryptocoins from coin gecko API, based on filters seen within the function above
-    cryptocoins = top_hundred_coins(cl)
+        # Check and combine to new and old dictionaries into a final dictionary of current coins
+        cryptocoins = revise_datasets(cryptocoins, existing_ohlcv_datasets, cl)
 
-    # Check and combine to new and old dictionaries into a final dictionary of current coins
-    cryptocoins = revise_datasets(cryptocoins, existing_ohlcv_datasets, cl)
+        # Save the new dictionary of cryptocoins
+        with open("coinnames/cryptocoins.json", "w") as outfile:
+            json.dump(cryptocoins, outfile)
 
+    # If the API call fails use the existing old dictionary
+    except Exception as e:
+        print("Failed to update coin list from coin gecko")
+        print(f"The reason was {e}")
+        print("Using old existing list of Top Coins")
+
+        existing_topcoins = open("coinnames/cryptocoins.json", "r")
+        cryptocoins = json.loads(existing_topcoins.read())
+
+    # Update the current list of Fiat currency exchange rates
     # Get fiat currency exchange rates
-    exchange_rates = fiat_exchange_rates()
 
-    # Get the names of the fiat currencies for the drop-down menu in the "custom plots drop-down menu"
-    fiat_names = get_fiat_names()
+    try:
+        exchange_rates = fiat_exchange_rates()
 
-    # Save the new dictionary of cryptocoins
-    with open("coinnames/cryptocoins.json", "w") as outfile:
-        json.dump(cryptocoins, outfile)
+        # Save the exchange rates
+        with open("fiat_exch_rates/exchrates.json", "w") as outfile:
+            json.dump(exchange_rates, outfile)
 
-    # Save the exchange rates
-    with open("fiat_exch_rates/exchrates.json", "w") as outfile:
-        json.dump(exchange_rates, outfile)
+    # If API call fails use old existing data
+    except Exception as e:
+        print("There was a problem getting fiat exchange rates")
+        print(f"The reason was {e}")
+        print("Using old exchange rates...")
 
-    # Save the names of fiat currencies as a dictionary in json format
-    fiat_names.to_json('fiat_exch_rates/fiat.json', orient='index')
+        existing_exchange = open("fiat_exch_rates/exchrates.json", "r")
+        exchange_rates = json.loads(existing_exchange.read())
+
+    #  Get the names of the fiat currencies for the drop-down menu in the "custom plots drop-down menu"
+    try:
+        fiat_names = get_fiat_names()
+
+        # Save the names of fiat currencies as a dictionary in json format
+        fiat_names.to_json('fiat_exch_rates/fiat.json', orient='index')
+
+    # Use existing list of names
+    except Exception as e:
+        print("There was a problem getting the names of fiat currencies...")
+        print(f"The reason was {e}")
+        print("Using existing names list...")
+
+        existing_fiat_names = open("fiat_exch_rates/fiat.json", "r")
+        fiat_names = json.loads(existing_fiat_names.read())
 
     print('Finished updating coin lists and fiat. Update will run again in 8 Hours.')
-
-
 
 
 # Schedule and run updates for OHLCV and TXN Volume data

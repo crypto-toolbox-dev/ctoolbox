@@ -20,14 +20,17 @@ from menu_items import fibonaccis as fibs
 from hompage_functions import top_ten, fearandgreed, returns, cumulative_returns, plot_multiline,\
     hbars, multi_bars, fng_line, mcap_pie_data, pie_chart, pie_chart_broken, spread
 
-
-from pprint import pprint
-
 # Check necessary directories for the app, usually only needs to be run once.
-check_dirs = False
+check_dirs = True
 
 if check_dirs == True:
     # Create necessary directories for the app
+    if not os.path.isdir('homepage_data'):
+        os.mkdir("homepage_data")
+
+    if not os.path.isdir('icons'):
+        os.mkdir("icons")
+
     if not os.path.isdir('datasets'):
         os.mkdir("datasets")
 
@@ -67,7 +70,21 @@ app = Flask(__name__)
 def hello():
 
     # Pull the current top 10 from CoinGecko
-    homecoins = top_ten()
+    try:
+        homecoins = top_ten()
+
+        # save dict
+        with open("homepage_data/homecoins.json", 'w') as outfile:
+            json.dump(homecoins, outfile)
+
+    # Get existing old data if API call fails
+    except Exception as e:
+        print("Problem getting homecoin list from CoinGecko")
+        print(f"The reason as {e}")
+        print("Using old existing list instead")
+
+        existing_homecoins = open("homepage_data/homecoins.json", "r")
+        homecoins = json.loads(existing_homecoins.read())
 
     # Copy the data to cleanup for display purposes on the homepage, without breaking or distorting anything else
     home_data = homecoins
@@ -95,7 +112,6 @@ def hello():
     # Plot Fear and Greed Index
     fng_plot = fng_line(labels, values, " ", (20, 5))
 
-
     # CUMULATIVE RETURNS
 
     # cumulative returns for all coins
@@ -106,7 +122,6 @@ def hello():
 
     # cumulative returns without dogecoin
     cumprod_daily_pct_no_shib_no_doge = [c for c in cumprod_daily_pct_no_shib if 'doge' not in c.columns]
-
 
     # Cumulative returns for dogecoin and shiba-inu
     doge_cumprod_daily_pct = [c for c in cumprod_daily_pct if 'doge' in c.columns]
@@ -133,7 +148,6 @@ def hello():
     # Plotting them along the rest makes it impossible to effectively visualize the data for the others
     multib_shiba = multi_bars(shiba_cumprod_daily_pct, 'Shiba-Inu Cumulative Returns', -3, None)
     multib_doge = multi_bars(doge_cumprod_daily_pct, 'Dogecoin Cumulative Returns', -3, None)
-
 
     # NORMAL RETURNS
     # Dynamically change the type of Returns plotted depending on if button on template is clicked
@@ -320,7 +334,23 @@ def hello():
         multibd_shib = multi_bars(return_pct_shib, 'Daily Returns by Year - Except Shiba-Inu', -2, None)
 
     # Pie Charts for Market Cap
-    market_capital = mcap_pie_data()
+    # Get the data from the API
+    try:
+        market_capital = mcap_pie_data()
+
+        # save dict
+        with open("homepage_data/mcap_pie15.json", 'w') as outfile:
+            json.dump(market_capital, outfile)
+
+    # Use local data if the API call fails
+    except Exception as e:
+        print("Something went wrong getting Market Cap data for the Pir Charts...")
+        print(f"The reason was {e}")
+        print("Using old local data...")
+
+        existing_mcap_pie_data = open("homepage_data/mcap_pie15.json", "r")
+        market_capital = json.loads(existing_mcap_pie_data.read())
+
     pie = pie_chart(market_capital, (12, 9))
     broken_pie = pie_chart_broken(market_capital, (12, 9))
 
@@ -677,16 +707,24 @@ def show_patterns():
     for i in range(len(symbols)):
         coin_names[symbols[i]] = {'Cryptocoin': names[i]}
 
-    # Get icons for the view
+    # Get icons for the view from CoinGecko API
     try:
         icon = top_ten(limit=100)
         coin_image = {k: {'Images': v} for (k, v) in
                       zip([x['symbol'].upper() for x in icon], [x['image'] for x in icon])}
 
+        # Save dict
+        with open("icons/coin_images.json", 'w') as outfile:
+            json.dump(coin_image, outfile)
+
+    # Use exisiting dictionary of dictionaries if the API call fails
     except Exception as e:
         print("Couldnt get icons")
         print(f"The reason is {e}")
+        print("Using old existing image dictionary instead...")
 
+        existing_icons = open("icons/coin_images.json", "r")
+        coin_image = json.loads(existing_icons.read())
 
     # When pattern was selected
     if pattern:
@@ -783,15 +821,24 @@ def show_indicators():
     for i in range(len(symbols)):
         coin_names[symbols[i]] = {'Cryptocoin': names[i]}
 
-    # Get icons for the view
+    # Get icons for the view from CoinGecko API
     try:
         icon = top_ten(limit=100)
         coin_image = {k: {'Images': v} for (k, v) in
                       zip([x['symbol'].upper() for x in icon], [x['image'] for x in icon])}
 
+        # Save dict
+        with open("icons/coin_images.json", 'w') as outfile:
+            json.dump(coin_image, outfile)
+
+    # Use exisiting dictionary of dictionaries if the API call fails
     except Exception as e:
         print("Couldnt get icons")
         print(f"The reason is {e}")
+        print("Using old existing image dictionary instead...")
+
+        existing_icons = open("icons/coin_images.json", "r")
+        coin_image = json.loads(existing_icons.read())
 
     # When an indicator is selected
     if indicator:
