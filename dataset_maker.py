@@ -170,31 +170,8 @@ def top_hundred_coins(limit):
     # Drop stablecoins and wrappers
     stablecoins = ['usdt', 'busd', "ust", 'mim', 'frax', 'tusd', 'usdc', 'dai', 'usdp', 'usdc', 'usdd', 'usdn']
     wrappercoins = ['wbtc', 'hbtc', 'steth', 'cdai']
-    stablecoinids = ['usd-coin', 'binance-usd', "paxos-standard","usd-coin"]
-
-    # Filter out stablecoins
-    for i in range(len(data)):
-        try:
-            if data[i]['symbol'].lower() in stablecoins:
-                del data[i]
-        except IndexError:
-            break
-
-    # Filter out wrappercoins
-    for i in range(len(data)):
-        try:
-            if data[i]['symbol'].lower() in wrappercoins:
-                del data[i]
-        except IndexError:
-            break
-
-    # Additional check by id for some coins which are not removed by the prior checks
-    for i in range(len(data)):
-        try:
-            if data[i]['id'].lower() in stablecoinids:
-                del data[i]
-        except IndexError:
-            break
+    data = [d for d in data if d['symbol'] not in stablecoins]
+    data = [d for d in data if d['symbol'] not in wrappercoins]
 
     # Get a dictionary of coins and their symbols for the webapp and lists for the datagrabber
     coins = [coin['id'] for coin in data]
