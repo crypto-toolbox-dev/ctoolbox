@@ -9,8 +9,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from dataset_maker import revise_datasets, fiat_exchange_rates, get_fiat_names, top_hundred_coins, coingecko_minute_data, \
     messari_historic, coingecko_historic, on_chain_txnvol
 
-
-# Declare the scheduler
 sched = BackgroundScheduler()
 
 # Number of coins to get
@@ -39,11 +37,53 @@ txn_data_dir = 'txn_vol/'
 txn_data_path = os.path.join(txn_data_dir)
 
 
+# Function to check and restart the scheduler if necessary
+def check_and_restart_fiatandcoinslist_scheduler():
+
+    jobs = sched.get_jobs()
+    job_names = [job.name for job in jobs]
+    is_update_databases_in_names = any(name == 'update_coinlists_and_fiatdata' for name in job_names)
+
+    if is_update_databases_in_names:
+        # 'update_coinlists_and_fiatdata' is in at least one job's name
+        print("Found 'update_coinlists_and_fiatdata' in job names.")
+        print("Fiat and coin lists Scheduler is running.")
+
+    else:
+        # 'update_coinlists_and_fiatdata' is not in any job's name
+        print("Did not find 'update_coinlists_and_fiatdata' in job names.")
+
+        sched.add_job(update_coinlists_and_fiatdata, 'interval', days=1)
+
+        sched.start()
+        print("Fiat and coin lists Scheduler restarted.")
+
+
+def check_and_restart_datasets_scheduler():
+
+    jobs = sched.get_jobs()
+    job_names = [job.name for job in jobs]
+    is_update_databases_in_names = any(name == 'update_datasets' for name in job_names)
+
+    if is_update_databases_in_names:
+        # 'update_databases' is in at least one job's name
+        print("Found 'update_datasets' in job names.")
+        print("update_databases Scheduler is running.")
+    else:
+        # 'update_databases' is not in any job's name
+        print("Did not find 'update_datasets' in job names.")
+
+        sched.add_job(update_datasets, 'interval', hours=1)
+
+        sched.start()
+        print("update_datasets Scheduler restarted.")
+
+
 
 # Schedule and run updates for top 50 cryptocoins, dictionary of currently tracked coins, and fiat exchange rates
 @sched.scheduled_job('interval', hours=8, next_run_time=datetime.datetime.now())
 
-def timed_job_two():
+def update_coinlists_and_fiatdata():
 
     # Function calls
     # Update the current list of the top coins and revise the existing one from coingecko
@@ -102,12 +142,12 @@ def timed_job_two():
         existing_fiat_names = open("fiat_exch_rates/fiat.json", "r")
         fiat_names = json.loads(existing_fiat_names.read())
 
-    print('Finished updating coin lists and fiat. Update will run again in 8 Hours.')
+    print('Finished updating coin lists and fiat. Update will run again in Tomorrow.')
 
 
 # Schedule and run updates for OHLCV and TXN Volume data
 @sched.scheduled_job('interval', hours=1, next_run_time=datetime.datetime.now())
-def timed_job():
+def update_datasets():
 
     # Read cryptocoins for which to get OHLCV and TXN VOL data
     with open("coinnames/cryptocoins.json", "r") as read_file:
@@ -450,8 +490,4 @@ def timed_job():
         # Pause the for loop iterations to not spam the APIs
         time.sleep(3)
 
-    print('Finished updating datasets. Update will run again in 15 Minutes.')
-
-
-# Invoke the schedulers
-sched.start()
+    print('Finished updating datasets. Update will run again in One Hour.')
