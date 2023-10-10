@@ -8,6 +8,11 @@ import pandas as pd
 
 from talib import abstract
 from flask import Flask, render_template, request
+
+from apscheduler.schedulers.background import BackgroundScheduler
+from background_updater import update_datasets, update_coinlists_and_fiatdata, check_and_restart_fiatandcoinslist_scheduler, \
+check_and_restart_datasets_scheduler
+
 from indicator_signals import buy_sell_signal
 from plots import plot_pattern_signals, plot_momentum_signals, plotter
 from parse_descriptions import get_indicator_descriptions, get_pattern_descriptions
@@ -21,7 +26,7 @@ from hompage_functions import top_ten, fearandgreed, returns, cumulative_returns
     hbars, multi_bars, fng_line, mcap_pie_data, pie_chart, pie_chart_broken, spread
 
 # Check necessary directories for the app, usually only needs to be run once.
-check_dirs = True
+check_dirs = False
 
 if check_dirs == True:
     # Create necessary directories for the app
@@ -51,19 +56,48 @@ if check_dirs == True:
 
 
 # Update the datasets for the app
-updates_active = False  # Set to false during some debugging operations
+updates_active = True  # Set to false during some debugging operations
 
 if updates_active == True:
 
-    from background_updater import timed_job as update_datasets
-    from background_updater import timed_job_two as update_coinlists_and_fiatdata
+    # Declare the scheduler
+    sched = BackgroundScheduler()
 
+    # Set dalays for the various jobs not to run at the same time
+    current_time = datetime.datetime.now()
+
+    short_delay = current_time + datetime.timedelta(minutes=1)
+    delay = current_time + datetime.timedelta(minutes=5)
+    test_delay = current_time + datetime.timedelta(minutes=10)
+    test_delay_two = current_time + datetime.timedelta(minutes=15)
+
+
+    # Schedule the check_and_restart_scheduler function to run periodically (e.g., every hour)
+    sched.add_job(check_and_restart_fiatandcoinslist_scheduler, 'interval', days=1)
+    sched.add_job(check_and_restart_datasets_scheduler, 'interval', days=1)
+
+
+    # Add your initial jobs to the scheduler
+    sched.add_job(update_coinlists_and_fiatdata, 'interval', days=1, next_run_time=short_delay)
+    sched.add_job(update_datasets, 'interval', hours=1, next_run_time=delay)
+
+    # Start the scheduler
+    sched.start()
+
+    # Debugging jobs
     print("Background updates active")
-    what_to_update_for = update_coinlists_and_fiatdata
-    coin_datasets = update_datasets
+    print("Active Jobs: ")
+    jobs = sched.get_jobs()
+    job_names = [job.name for job in jobs]
+    job_times = [job.next_run_time for job in jobs]
+
+    for name,time in zip(job_names,job_times):
+        print(f"{name} will run at {time}")
 
 
 app = Flask(__name__)
+
+
 
 # Homepage
 @app.route('/', methods=["GET", "POST"])
