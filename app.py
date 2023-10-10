@@ -25,35 +25,6 @@ from menu_items import fibonaccis as fibs
 from hompage_functions import top_ten, fearandgreed, returns, cumulative_returns, plot_multiline,\
     hbars, multi_bars, fng_line, mcap_pie_data, pie_chart, pie_chart_broken, spread
 
-# Check necessary directories for the app, usually only needs to be run once.
-check_dirs = False
-
-if check_dirs == True:
-    # Create necessary directories for the app
-    if not os.path.isdir('homepage_data'):
-        os.mkdir("homepage_data")
-
-    if not os.path.isdir('icons'):
-        os.mkdir("icons")
-
-    if not os.path.isdir('datasets'):
-        os.mkdir("datasets")
-
-    if not os.path.isdir('txn_vol'):
-        os.mkdir("txn_vol")
-
-    if not os.path.isdir('descriptions'):
-        os.mkdir("descriptions")
-
-    if not os.path.isdir('notcurrentlyupdated'):
-        os.mkdir("notcurrentlyupdated")
-
-    if not os.path.isdir('coinnames'):
-        os.mkdir("coinnames")
-
-    if not os.path.isdir('fiat_exch_rates'):
-        os.mkdir("fiat_exch_rates")
-
 
 # Update the datasets for the app
 updates_active = True  # Set to false during some debugging operations
