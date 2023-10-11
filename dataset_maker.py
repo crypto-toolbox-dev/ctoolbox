@@ -563,3 +563,16 @@ def on_chain_txnvol(coin, symbol, from_date, at_date):
             print(f"The Retry attempts were exhausted...")
 
         return None
+
+
+def fill_missing_dates_with_average(df, window=30):
+    # Reindex the DataFrame with the full date range
+    date_range = pd.date_range(start=df.index.min(), end=df.index.max())
+    df = df.reindex(date_range)
+
+    # Fill missing values in each column with the rolling mean of the past 'window' days
+    for column in df.columns:
+        df[column] = df[column].fillna(df[column].rolling(window=window, min_periods=1).mean())
+
+    return df
+
