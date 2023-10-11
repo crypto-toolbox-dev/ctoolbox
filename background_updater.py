@@ -9,6 +9,37 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from dataset_maker import revise_datasets, fiat_exchange_rates, get_fiat_names, top_hundred_coins, coingecko_minute_data, \
     messari_historic, coingecko_historic, on_chain_txnvol, fill_missing_dates_with_average
 
+# Check necessary directories for the app, usually only needs to be run once.
+check_dirs = False
+
+if check_dirs == True:
+    # Create necessary directories for the app
+    if not os.path.isdir('homepage_data'):
+        os.mkdir("homepage_data")
+
+    if not os.path.isdir('icons'):
+        os.mkdir("icons")
+
+    if not os.path.isdir('datasets'):
+        os.mkdir("datasets")
+
+    if not os.path.isdir('txn_vol'):
+        os.mkdir("txn_vol")
+
+    if not os.path.isdir('descriptions'):
+        os.mkdir("descriptions")
+
+    if not os.path.isdir('notcurrentlyupdated'):
+        os.mkdir("notcurrentlyupdated")
+
+    if not os.path.isdir('coinnames'):
+        os.mkdir("coinnames")
+
+    if not os.path.isdir('fiat_exch_rates'):
+        os.mkdir("fiat_exch_rates")
+
+
+# Invoke background scheduler for updates
 sched = BackgroundScheduler()
 
 # Number of coins to get
