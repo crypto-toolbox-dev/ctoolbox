@@ -10,7 +10,7 @@ from dataset_maker import revise_datasets, fiat_exchange_rates, get_fiat_names, 
     messari_historic, coingecko_historic, on_chain_txnvol, fill_missing_dates_with_average
 
 # Check necessary directories for the app, usually only needs to be run once.
-check_dirs = False
+check_dirs = True
 
 if check_dirs == True:
     # Create necessary directories for the app
@@ -496,6 +496,8 @@ def update_datasets():
             if len(last_test) >= 1:
 
                 ohlcv_data = fill_missing_dates_with_average(ohlcv_data)
+                ohlcv_data.index.name = 'dates'
+
 
 
                 # Save OHLCV

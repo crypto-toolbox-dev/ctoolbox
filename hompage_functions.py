@@ -265,9 +265,26 @@ def returns(coins, period=1):
     returns = []
 
     for c in coins:
+        print(c["id"])
         try:
+            pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_columns', None)
+            pd.set_option('display.width', None)
+
             df = pd.read_csv(f'datasets/{c["id"].lower()}({c["symbol"].lower()}).csv', index_col=0)
+
+            if c['id'] == 'shiba-inu':
+                print(df)
+
             df.index = pd.to_datetime(df.index)
+
+            if c['id'] == 'shiba-inu':
+                print(df)
+
+            # After printing your DataFrame, you can reset the options to their default values
+            pd.reset_option('display.max_rows')
+            pd.reset_option('display.max_columns')
+            pd.reset_option('display.width')
 
         except FileNotFoundError:
             print(f"No Data for {c['id']}({c['symbol']})")
