@@ -7,37 +7,7 @@ import pandas as pd
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from dataset_maker import revise_datasets, fiat_exchange_rates, get_fiat_names, top_hundred_coins, coingecko_minute_data, \
-    messari_historic, coingecko_historic, on_chain_txnvol
-
-# Check necessary directories for the app, usually only needs to be run once.
-check_dirs = True
-
-if check_dirs == True:
-    # Create necessary directories for the app
-    if not os.path.isdir('homepage_data'):
-        os.mkdir("homepage_data")
-
-    if not os.path.isdir('icons'):
-        os.mkdir("icons")
-
-    if not os.path.isdir('datasets'):
-        os.mkdir("datasets")
-
-    if not os.path.isdir('txn_vol'):
-        os.mkdir("txn_vol")
-
-    if not os.path.isdir('descriptions'):
-        os.mkdir("descriptions")
-
-    if not os.path.isdir('notcurrentlyupdated'):
-        os.mkdir("notcurrentlyupdated")
-
-    if not os.path.isdir('coinnames'):
-        os.mkdir("coinnames")
-
-    if not os.path.isdir('fiat_exch_rates'):
-        os.mkdir("fiat_exch_rates")
-
+    messari_historic, coingecko_historic, on_chain_txnvol, fill_missing_dates_with_average
 
 sched = BackgroundScheduler()
 
@@ -409,7 +379,6 @@ def update_datasets():
                     ohlcv_data = ohlcv_data.set_index('dates')
                     ohlcv_data = ohlcv_data[['open', 'high', 'low', 'close', 'volume']]
 
-
                 else:
                     ohlcv_data = pd.concat([daily_data, minute_data], axis=0, sort=True)
 
@@ -492,19 +461,14 @@ def update_datasets():
             # Perform one last check of the dataset for any gaps
             last_test = pd.date_range(start=ohlcv_data.index[0], end=ohlcv_data.index[-1]).difference(ohlcv_data.index)
 
-            # if less than 10 dates are missing, fill them with the mean values for that dataset
-            if len(last_test) >= 1 and len(last_test) <= 14:
+            # if there are missing dates forward will them with a rolling 30 day mean prior to missing date
+            if len(last_test) >= 1:
 
-                for col in ohlcv_data.columns:
-                    ohlcv_data[col].fillna(ohlcv_data[col].mean(), inplace=True)
+                ohlcv_data = fill_missing_dates_with_average(ohlcv_data)
+
 
                 # Save OHLCV
                 ohlcv_data.to_csv(f'datasets/{coin}({symbol}).csv')
-
-            # If more than 10 you can't use the dataset because it will have too many mean values
-            elif len(last_test) > 14:
-                print(f"Dataset for {coin}({symbol}) failed final check. Not saving....")
-
 
             else:
                 # Save OHLCV
